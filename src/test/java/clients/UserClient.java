@@ -9,29 +9,19 @@ import static io.restassured.RestAssured.given;
 
 
 public class UserClient {
-
-    public List<User> getUsers() {
-        return given()
-                .get(Config.BASE_URL + USERS_ENDPOINT)
-                .then()
-                .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getList("", User.class);
-    }
-
     private static final String USERS_ENDPOINT = "/users";
 
-    public User createUser(User user) {
+    public Response getUsers() {
+        return given()
+                .get(Config.BASE_URL + USERS_ENDPOINT);
+    }
+
+    public Response createUser(User user) {
         return given()
                 .body(user)
                 .header("Accept", "application/json")
                 .contentType("application/json")
-                .post(Config.BASE_URL + USERS_ENDPOINT)
-                .then()
-                .statusCode(201)
-                .extract()
-                .as(User.class);
+                .post(Config.BASE_URL + USERS_ENDPOINT);
     }
 
     public Response getUserById(int userId) {
@@ -40,25 +30,19 @@ public class UserClient {
                 .get(Config.BASE_URL + USERS_ENDPOINT + "/{id}");
     }
 
-    public User updateUser(int userId, User user) {
+    public Response updateUser(int userId, User user) {
         return given()
                 .pathParam("id", userId)
                 .header("Accept", "application/json")
                 .body(user)
                 .contentType("application/json")
-                .put(Config.BASE_URL + USERS_ENDPOINT + "/{id}")
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(User.class);
+                .put(Config.BASE_URL + USERS_ENDPOINT + "/{id}");
     }
 
-    public void deleteUser(int userId) {
-        given()
+    public Response deleteUser(int userId) {
+        return given()
                 .pathParam("id", userId)
-                .delete(Config.BASE_URL + USERS_ENDPOINT + "/{id}")
-                .then()
-                .statusCode(200);
-
+                .delete(Config.BASE_URL + USERS_ENDPOINT + "/{id}");
     }
+
 }
