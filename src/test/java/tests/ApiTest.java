@@ -73,7 +73,7 @@ public class ApiTest {
 
         assertEquals(2, user.getId());
         assertEquals("Ervin Howell", user.getName());
-        assertEquals("wrong@ex.com", user.getEmail());
+        assertEquals("Shanna@melissa.tv", user.getEmail());
     }
 
     @Test
