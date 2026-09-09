@@ -41,7 +41,12 @@ public class ApiTest {
                 "john@example.com"
         );
 
-        User createdUser = userClient.createUser(user);
+        Response response = userClient.createUser(user);
+
+        response.then()
+                .statusCode(201);
+
+        User createdUser = response.as(User.class);
 
         assertTrue(createdUser.getId() > 0);
         assertEquals("John Doe", createdUser.getName());
@@ -53,7 +58,13 @@ public class ApiTest {
     void getUsersTest() {
         UserClient userClient = new UserClient();
 
-        List<User> users = userClient.getUsers();
+        Response response = userClient.getUsers();
+
+        response.then()
+                .statusCode(200);
+
+        List<User> users = response.jsonPath()
+                .getList("", User.class);
 
         assertEquals(10, users.size());
         assertEquals(5, users.get(4).getId());
@@ -88,31 +99,53 @@ public class ApiTest {
 
     @Test
     void createUserTest() {
-        User user = new User("John Doe", "johndoe", "john@example.com");
+        User user = new User(
+                "John Doe",
+                "johndoe",
+                "john@example.com"
+        );
 
         UserClient userClient = new UserClient();
-        User createdUser = userClient.createUser(user);
+
+        Response response = userClient.createUser(user);
+
+        response.then()
+                .statusCode(201);
+
+        User createdUser = response.as(User.class);
+
         assertEquals("John Doe", createdUser.getName());
         assertTrue(createdUser.getId() > 0);
         assertEquals("johndoe", createdUser.getUsername());
     }
+
     @Test
     void deleteUserTest() {
         UserClient userClient = new UserClient();
 
-        // Отправляем DELETE-запрос для пользователя с id = 2.
-        // clients.UserClient внутри проверяет, что API вернул статус 200.
-        userClient.deleteUser(2);
+        Response response = userClient.deleteUser(2);
+
+        response.then()
+                .statusCode(200);
     }
+
     @Test
     void updateUserTest() {
         UserClient userClient = new UserClient();
 
-        User user = new User("Updated Name", "updateduser", "updated@example.com");
+        User user = new User(
+                "Updated Name",
+                "updateduser",
+                "updated@example.com"
+        );
 
-        User updatedUser = userClient.updateUser(2, user);
+        Response response = userClient.updateUser(2, user);
 
-        // Проверяем, что API вернул те данные, которые мы отправили.
+        response.then()
+                .statusCode(200);
+
+        User updatedUser = response.as(User.class);
+
         assertEquals("Updated Name", updatedUser.getName());
         assertEquals("updateduser", updatedUser.getUsername());
         assertEquals("updated@example.com", updatedUser.getEmail());
