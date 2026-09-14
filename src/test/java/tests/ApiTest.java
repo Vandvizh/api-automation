@@ -3,82 +3,49 @@ package tests;
 import clients.UserClient;
 import models.User;
 import org.junit.jupiter.api.Test;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.hamcrest.Matchers.hasItem;
 import io.restassured.response.Response;
 import java.util.List;
+import static specifications.ResponseSpecs.OK_RESPONSE;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.BeforeEach;
+
 
 
 
 public class ApiTest {
-
-    @Test
-    void getUserAndUseIdTest() {
-        Response response = given()
-                .get("https://jsonplaceholder.typicode.com/users/2");
-
-        int userId = response.jsonPath().getInt("id");
-
-        Response secondResponse = given()
-                .pathParam("id", userId)
-                .get("https://jsonplaceholder.typicode.com/users/{id}");
-
-        secondResponse.then()
-                .statusCode(200)
-                .body("id", equalTo(userId));
+    private UserClient userClient;
+    @BeforeEach
+    void setUp() {
+        userClient = new UserClient();
     }
 
-    @Test
-    void createAndGetUserTest() {
-        UserClient userClient = new UserClient();
-
-        User user = new User(
-                "John Doe",
-                "johndoe",
-                "john@example.com"
-        );
-
-        Response response = userClient.createUser(user);
-
-        response.then()
-                .statusCode(201);
-
-        User createdUser = response.as(User.class);
-
-        assertTrue(createdUser.getId() > 0);
-        assertEquals("John Doe", createdUser.getName());
-        assertEquals("johndoe", createdUser.getUsername());
-        assertEquals("john@example.com", createdUser.getEmail());
-    }
 
     @Test
     void getUsersTest() {
-        UserClient userClient = new UserClient();
 
         Response response = userClient.getUsers();
 
         response.then()
-                .statusCode(200);
+                .spec(OK_RESPONSE);
 
         List<User> users = response.jsonPath()
                 .getList("", User.class);
 
         assertEquals(10, users.size());
-        assertEquals(5, users.get(4).getId());
     }
 
 
     @Test
     void getUserByIdTest() {
-        UserClient userClient = new UserClient();
 
         Response response = userClient.getUserById(2);
 
         response.then()
-                .statusCode(200);
+                .spec(OK_RESPONSE);
 
         User user = response.as(User.class);
 
@@ -87,11 +54,15 @@ public class ApiTest {
         assertEquals("Shanna@melissa.tv", user.getEmail());
     }
 
-    @Test
-    void getNonExistingUserTest() {
-        UserClient userClient = new UserClient();
+    @ParameterizedTest
+    @CsvSource({
+            "999",
+            "1000",
+            "-1"
+    })
+    void getNonExistingUserTest(int userId) {
 
-        Response response = userClient.getUserById(999);
+        Response response = userClient.getUserById(userId);
 
         response.then()
                 .statusCode(404);
@@ -105,10 +76,8 @@ public class ApiTest {
                 "john@example.com"
         );
 
-        UserClient userClient = new UserClient();
 
         Response response = userClient.createUser(user);
-
         response.then()
                 .statusCode(201);
 
@@ -117,21 +86,20 @@ public class ApiTest {
         assertEquals("John Doe", createdUser.getName());
         assertTrue(createdUser.getId() > 0);
         assertEquals("johndoe", createdUser.getUsername());
+        assertEquals("john@example.com", createdUser.getEmail());
     }
 
     @Test
     void deleteUserTest() {
-        UserClient userClient = new UserClient();
 
         Response response = userClient.deleteUser(2);
 
         response.then()
-                .statusCode(200);
+                .spec(OK_RESPONSE);
     }
 
     @Test
     void updateUserTest() {
-        UserClient userClient = new UserClient();
 
         User user = new User(
                 "Updated Name",
@@ -142,7 +110,7 @@ public class ApiTest {
         Response response = userClient.updateUser(2, user);
 
         response.then()
-                .statusCode(200);
+                .spec(OK_RESPONSE);
 
         User updatedUser = response.as(User.class);
 

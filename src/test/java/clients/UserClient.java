@@ -1,48 +1,59 @@
 package clients;
 import config.Config;
 import models.User;
-import java.util.List;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
+
 
 import static io.restassured.RestAssured.given;
 
 
 
 public class UserClient {
+
+    static {
+        RestAssured.baseURI = Config.BASE_URL;
+    }
+
     private static final String USERS_ENDPOINT = "/users";
+    private static final RequestSpecification JSON_REQUEST_SPEC =
+            new RequestSpecBuilder()
+                    .setContentType("application/json")
+                    .setAccept("application/json")
+                    .build();
 
     public Response getUsers() {
         return given()
-                .get(Config.BASE_URL + USERS_ENDPOINT);
+                .get(USERS_ENDPOINT);
     }
 
     public Response createUser(User user) {
         return given()
+                .spec(JSON_REQUEST_SPEC)
                 .body(user)
-                .header("Accept", "application/json")
-                .contentType("application/json")
-                .post(Config.BASE_URL + USERS_ENDPOINT);
+                .post(USERS_ENDPOINT);
     }
 
     public Response getUserById(int userId) {
         return given()
                 .pathParam("id", userId)
-                .get(Config.BASE_URL + USERS_ENDPOINT + "/{id}");
+                .get(USERS_ENDPOINT + "/{id}");
     }
 
     public Response updateUser(int userId, User user) {
         return given()
+                .spec(JSON_REQUEST_SPEC)
                 .pathParam("id", userId)
-                .header("Accept", "application/json")
                 .body(user)
-                .contentType("application/json")
-                .put(Config.BASE_URL + USERS_ENDPOINT + "/{id}");
+                .put(USERS_ENDPOINT + "/{id}");
     }
 
     public Response deleteUser(int userId) {
         return given()
                 .pathParam("id", userId)
-                .delete(Config.BASE_URL + USERS_ENDPOINT + "/{id}");
+                .delete(USERS_ENDPOINT + "/{id}");
     }
 
 }
